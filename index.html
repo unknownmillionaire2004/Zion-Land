@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zion Land | Hyderabad's Trusted Real Estate Aggregator</title>
+  <meta name="description" content="Zion Land — Compare RERA-approved developers, properties and investment hotspots across Hyderabad. Find flats, villas, plots and investment-ready projects in one place." />
+  <meta property="og:title" content="Zion Land | Hyderabad Real Estate" />
+  <meta property="og:description" content="Compare RERA-approved developers & properties in Hyderabad. Discover hotspots and make smarter investments." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://placehold.co/1200x630/1e293b/3b82f6?text=Zion+Land" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="https://placehold.co/32x32/1e293b/ffffff?text=Z" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-1: #0f172a; /* deep slate */
+      --brand-2: #1e40af; /* indigo */
+      --brand-3: #3b82f6; /* blue */
+      --muted: #64748b;
+    }
+    html,body { height:100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: #f8fafc;
+      color: var(--brand-1);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x: hidden;
+    }
+
+    /* three.js canvas */
+    #particle-canvas { position: fixed; inset: 0; width:100%; height:100%; z-index:-1; opacity:0.22; pointer-events:none; }
+
+    /* scroll reveal */
+    .fade-in-section { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-in-section.is-visible { opacity:1; transform:none; }
+
+    /* property card */
+    .property-card { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; border:1px solid #e6eef9; }
+    .property-card:hover { transform: translateY(-6px); box-shadow: 0 10px 30px rgba(14,30,37,0.08); border-color: rgba(56,139,253,0.18); }
+
+    /* marquee logos */
+    @keyframes scroll { 0% { transform: translateX(0)} 100% { transform: translateX(-50%)} }
+    .animate-scroll { animation: scroll 28s linear infinite; display:flex; }
+
+    /* search suggestions */
+    .search-suggestions { position:absolute; top:100%; left:0; right:0; z-index:50; background:white; border-radius:0 0 .75rem .75rem; border:1px solid #e6eef9; max-height:280px; overflow:auto; box-shadow: 0 6px 24px rgba(17,24,39,0.06); display:none; }
+
+    /* compare drawer */
+    .compare-drawer { position: fixed; right: 0; top:0; bottom:0; width: 380px; max-width: 92%; background: white; box-shadow: -12px 0 36px rgba(2,6,23,0.14); transform: translateX(110%); transition: transform .32s ease; z-index:60; }
+    .compare-drawer.open { transform: translateX(0); }
+
+    /* scrollbars */
+    .no-scrollbar::-webkit-scrollbar { display:none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <!-- Structured Data (schema.org) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "name": "Zion Land",
+    "url": "https://zionland.example",
+    "logo": "https://placehold.co/600x200/1e293b/3b82f6?text=Zion+Land",
+    "telephone": "+91 98765 43210",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Hyderabad",
+      "addressLocality": "Hyderabad",
+      "addressRegion": "Telangana",
+      "postalCode": "500000",
+      "addressCountry": "IN"
+    },
+    "sameAs": []
+  }
+  </script>
+
+</head>
+<body class="antialiased">
+
+  <!-- Particle Canvas (Three.js) -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- NAV -->
+  <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+          <a href="#" class="flex items-center space-x-3" aria-label="Zion Land home">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-[color:var(--brand-2)] to-[color:var(--brand-3)] flex items-center justify-center text-white font-extrabold">Z</div>
+            <div>
+              <div class="text-lg font-bold text-slate-900">Zion Land</div>
+              <div class="text-xs text-muted">Hyderabad Real Estate</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- desktop links -->
+        <nav class="hidden md:flex space-x-6 text-sm font-medium text-slate-700" aria-label="Main navigation">
+          <a class="hover:text-blue-600 transition" href="#buy">Buy</a>
+          <a class="hover:text-blue-600 transition" href="#rent">Rent</a>
+          <a class="hover:text-blue-600 transition" href="#projects">New Projects</a>
+          <a class="hover:text-blue-600 transition" href="#plots">Plots/Land</a>
+          <a class="hover:text-blue-600 transition" href="#investment">Investment Guide</a>
+        </nav>
+
+        <!-- actions -->
+        <div class="flex items-center space-x-3">
+          <button id="saved-btn" class="hidden sm:inline-flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-lg text-sm hover:bg-blue-600 hover:text-white transition"><i class="fa-regular fa-heart"></i> Saved</button>
+          <div class="relative group">
+            <button id="account-btn" aria-haspopup="true" aria-expanded="false" class="flex items-center space-x-2 bg-slate-100 px-3 py-2 rounded-lg text-sm hover:bg-blue-600 hover:text-white transition">
+              <i class="fa-regular fa-user"></i><span class="hidden sm:inline">Account</span><i class="fa-solid fa-chevron-down text-xs"></i>
+            </button>
+            <div role="menu" aria-hidden="true" class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg">
+              <a href="#" class="block px-4 py-2 hover:bg-slate-50">My Profile</a>
+              <a href="#" class="block px-4 py-2 hover:bg-slate-50">My Properties</a>
+              <a href="#" class="block px-4 py-2 hover:bg-slate-50">Settings</a>
+              <div class="border-t"></div>
+              <a href="#" class="block px-4 py-2 hover:bg-slate-50">Login / Register</a>
+            </div>
+          </div>
+
+          <!-- mobile hamburger -->
+          <button id="nav-toggle" class="ml-2 md:hidden p-2 rounded-md bg-slate-100" aria-label="Open menu" aria-expanded="false">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- mobile nav -->
+    <nav id="mobile-nav" class="md:hidden bg-white border-t hidden">
+      <div class="px-4 py-3 space-y-1">
+        <a href="#buy" class="block px-2 py-2 rounded hover:bg-slate-100">Buy</a>
+        <a href="#rent" class="block px-2 py-2 rounded hover:bg-slate-100">Rent</a>
+        <a href="#projects" class="block px-2 py-2 rounded hover:bg-slate-100">New Projects</a>
+        <a href="#plots" class="block px-2 py-2 rounded hover:bg-slate-100">Plots/Land</a>
+        <a href="#investment" class="block px-2 py-2 rounded hover:bg-slate-100">Investment Guide</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <main>
+    <section class="bg-gradient-to-br from-[color:var(--brand-2)] to-[color:var(--brand-3)] text-white py-12 md:py-20">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="text-center max-w-3xl mx-auto space-y-4 fade-in-section">
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">Find RERA-approved properties & compare top Hyderabad developers</h1>
+          <p class="text-lg md:text-xl text-blue-100">Zion Land lists verified developers, flats, villas, plots and investment hotspots — all in one place. Compare quickly and invest smartly.</p>
+        </div>
+
+        <!-- SEARCH CARD -->
+        <div class="mt-8 bg-white rounded-2xl p-5 md:p-8 shadow-2xl max-w-5xl mx-auto fade-in-section" role="region" aria-label="Search properties">
+          <div class="flex flex-col md:flex-row gap-4">
+            <!-- primary search -->
+            <div class="flex-1 relative">
+              <label for="search-input" class="sr-only">Search location, project or developer</label>
+              <input id="search-input" type="search" placeholder="Search by location, project, or developer..." autocomplete="off"
+                class="w-full border rounded-xl p-4 pr-28 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <button id="search-btn" class="absolute right-3 top-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Search</button>
+
+              <div id="search-suggestions" class="search-suggestions no-scrollbar" role="listbox" aria-label="Search suggestions"></div>
+            </div>
+
+            <!-- quick filters -->
+            <div class="w-full md:w-72 flex flex-wrap gap-2 md:gap-3">
+              <select id="type-filter" aria-label="Property type" class="w-full md:w-1/2 border rounded-lg p-3 text-sm">
+                <option value="">All Types</option>
+                <option>Apartment</option><option>Villa</option><option>Plot</option><option>Commercial</option>
+              </select>
+              <select id="budget-filter" aria-label="Budget" class="w-full md:w-1/2 border rounded-lg p-3 text-sm">
+                <option value="">Any Budget</option>
+                <option>₹ 50 L - ₹ 1 Cr</option><option>₹ 1 Cr - ₹ 2 Cr</option><option>₹ 2 Cr+</option>
+              </select>
+              <button id="clear-filters" class="mt-1 md:mt-0 w-full md:w-auto bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm">Reset</button>
+            </div>
+          </div>
+
+          <div class="mt-4 text-sm text-muted">Tip: Type <strong>Kokapet</strong>, <strong>Gachibowli</strong> or a developer to get instant suggestions.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORE: categories -->
+    <section id="buy" class="py-12 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <h2 class="text-2xl font-bold text-slate-900 text-center mb-6 fade-in-section">Explore Real Estate Options</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 fade-in-section">
+          <article class="property-card rounded-xl overflow-hidden bg-white" tabindex="0" role="article" aria-label="Buying a home">
+            <img src="https://placehold.co/600x360/f0f9ff/0c4a6e?text=Apartments" alt="Apartments" class="w-full h-44 object-cover">
+            <div class="p-4">
+              <h3 class="font-semibold text-lg">Apartments</h3>
+              <p class="text-sm text-muted mt-2">New launches & resale. Filter by builder & RERA approval.</p>
+            </div>
+          </article>
+
+          <article class="property-card rounded-xl overflow-hidden bg-white" tabindex="0" role="article" aria-label="Villas">
+            <img src="https://placehold.co/600x360/f0fdf4/166534?text=Villas" alt="Villas" class="w-full h-44 object-cover">
+            <div class="p-4">
+              <h3 class="font-semibold text-lg">Villas</h3>
+              <p class="text-sm text-muted mt-2">Independent & gated community villas.</p>
+            </div>
+          </article>
+
+          <article class="property-card rounded-xl overflow-hidden bg-white" tabindex="0" role="article" aria-label="Plots & land">
+            <img src="https://placehold.co/600x360/fff7ed/7c2d12?text=Plots+%26+Land" alt="Plots and Land" class="w-full h-44 object-cover">
+            <div class="p-4">
+              <h3 class="font-semibold text-lg">Plots & Land</h3>
+              <p class="text-sm text-muted mt-2">Agricultural, residential & development plots.</p>
+            </div>
+          </article>
+
+          <article class="property-card rounded-xl overflow-hidden bg-white" tabindex="0" role="article" aria-label="Commercial spaces">
+            <img src="https://placehold.co/600x360/f3f4f6/1f2937?text=Commercial" alt="Commercial spaces" class="w-full h-44 object-cover">
+            <div class="p-4">
+              <h3 class="font-semibold text-lg">Commercial</h3>
+              <p class="text-sm text-muted mt-2">Office, retail & investment grade commercial properties.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Partner carousel -->
+    <section class="py-8 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <h3 class="text-xl font-semibold text-center mb-4 fade-in-section">Trusted Developers & Partners</h3>
+        <div class="overflow-hidden border rounded-xl bg-white p-4">
+          <div class="animate-scroll gap-6 flex">
+            <!-- duplicate logos for seamless loop -->
+            <div class="flex gap-6 items-center">
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">MY HOME</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">PRESTIGE</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">BBG LAND</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">APARNA</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">RAHEJA</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">LODHA</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">GODREJ</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">SOBHA</div>
+            </div>
+            <!-- repeat -->
+            <div class="flex gap-6 items-center">
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">MY HOME</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">PRESTIGE</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">BBG LAND</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">APARNA</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">RAHEJA</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">LODHA</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">GODREJ</div>
+              <div class="px-3 py-3 bg-white rounded-lg shadow-sm text-sm font-semibold">SOBHA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hotspots -->
+    <section id="investment" class="py-12 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <h2 class="text-2xl font-bold text-center mb-4 fade-in-section">Hyderabad Investment Hotspots</h2>
+        <p class="text-center text-sm text-muted mb-8 fade-in-section">Research-backed areas and ROI potential — updated regularly.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- sample location card -->
+          <article class="location-card rounded-xl bg-white p-4 property-card fade-in-section">
+            <div class="h-36 rounded-lg bg-gradient-to-r from-blue-500 to-sky-700 relative overflow-hidden">
+              <div class="absolute inset-0 bg-black/20"></div>
+              <div class="absolute bottom-3 left-3 text-white">
+                <h3 class="font-bold text-lg">Kokapet</h3>
+                <p class="text-sm">Financial District</p>
+              </div>
+              <div class="absolute top-3 right-3 bg-amber-400 text-slate-900 px-2 py-1 rounded-full text-xs font-semibold">22% Growth</div>
+            </div>
+            <div class="mt-3">
+              <div class="flex justify-between items-center mb-2">
+                <div><p class="text-xs text-muted">From</p><div class="text-lg font-bold">₹25,000/sq.yd</div></div>
+                <div class="text-right"><p class="text-xs text-muted">ROI</p><div class="text-lg font-bold text-green-600">18–25%</div></div>
+              </div>
+              <p class="text-sm text-muted mb-3">Near new financial & transport infra — recommended for long-term investors.</p>
+              <button class="w-full bg-blue-600 text-white py-2 rounded-lg" aria-controls="properties-kokapet">Explore 42 Properties</button>
+            </div>
+          </article>
+
+          <!-- other sample choices (Gachibowli, Shadnagar, Miyapur) -->
+          <article class="location-card rounded-xl bg-white p-4 property-card fade-in-section">
+            <div class="h-36 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-700 relative overflow-hidden">
+              <div class="absolute inset-0 bg-black/18"></div>
+              <div class="absolute bottom-3 left-3 text-white">
+                <h3 class="font-bold text-lg">Gachibowli</h3><p class="text-sm">IT Hub</p>
+              </div>
+              <div class="absolute top-3 right-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold">18% Growth</div>
+            </div>
+            <div class="mt-3">
+              <div class="flex justify-between items-center mb-2">
+                <div><p class="text-xs text-muted">From</p><div class="text-lg font-bold">₹35,000/sq.yd</div></div>
+                <div class="text-right"><p class="text-xs text-muted">ROI</p><div class="text-lg font-bold text-green-600">15–20%</div></div>
+              </div>
+              <p class="text-sm text-muted mb-3">Established IT corridor with strong rental demand.</p>
+              <button class="w-full bg-blue-600 text-white py-2 rounded-lg">Explore 38 Properties</button>
+            </div>
+          </article>
+
+          <article class="location-card rounded-xl bg-white p-4 property-card fade-in-section">
+            <div class="h-36 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 relative overflow-hidden">
+              <div class="absolute inset-0 bg-black/18"></div>
+              <div class="absolute bottom-3 left-3 text-white"><h3 class="font-bold text-lg">Shadnagar</h3><p class="text-sm">Growth Corridor</p></div>
+              <div class="absolute top-3 right-3 bg-amber-400 text-slate-900 px-2 py-1 rounded-full text-xs font-semibold">26% Growth</div>
+            </div>
+            <div class="mt-3">
+              <div class="flex justify-between items-center mb-2">
+                <div><p class="text-xs text-muted">From</p><div class="text-lg font-bold">₹15,000/sq.yd</div></div>
+                <div class="text-right"><p class="text-xs text-muted">ROI</p><div class="text-lg font-bold text-green-600">20–30%</div></div>
+              </div>
+              <p class="text-sm text-muted mb-3">Affordable plots near planned infra projects.</p>
+              <button class="w-full bg-blue-600 text-white py-2 rounded-lg">Explore 56 Properties</button>
+            </div>
+          </article>
+
+          <article class="location-card rounded-xl bg-white p-4 property-card fade-in-section">
+            <div class="h-36 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 relative overflow-hidden">
+              <div class="absolute inset-0 bg-black/18"></div>
+              <div class="absolute bottom-3 left-3 text-white"><h3 class="font-bold text-lg">Miyapur</h3><p class="text-sm">Residential Hub</p></div>
+              <div class="absolute top-3 right-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold">16% Growth</div>
+            </div>
+            <div class="mt-3">
+              <div class="flex justify-between items-center mb-2">
+                <div><p class="text-xs text-muted">From</p><div class="text-lg font-bold">₹28,000/sq.yd</div></div>
+                <div class="text-right"><p class="text-xs text-muted">ROI</p><div class="text-lg font-bold text-green-600">12–18%</div></div>
+              </div>
+              <p class="text-sm text-muted mb-3">Good connectivity and established amenities.</p>
+              <button class="w-full bg-blue-600 text-white py-2 rounded-lg">Explore 31 Properties</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Popular Tools -->
+    <section class="py-12 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold">Popular Tools</h3>
+          <a href="#" class="text-blue-600">View all tools</a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white p-6 rounded-xl property-card text-center">
+            <i class="fa-solid fa-calculator text-3xl text-blue-600 mb-3"></i>
+            <h4 class="font-semibold mb-1">Budget Calculator</h4>
+            <p class="text-sm text-muted">Estimate affordability.</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl property-card text-center">
+            <i class="fa-solid fa-money-bill-transfer text-3xl text-blue-600 mb-3"></i>
+            <h4 class="font-semibold mb-1">EMI Calculator</h4>
+            <p class="text-sm text-muted">Monthly repayment breakdown.</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl property-card text-center">
+            <i class="fa-solid fa-check text-3xl text-blue-600 mb-3"></i>
+            <h4 class="font-semibold mb-1">Loan Eligibility</h4>
+            <p class="text-sm text-muted">See approximate loan amounts.</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl property-card text-center">
+            <i class="fa-solid fa-ruler-combined text-3xl text-blue-600 mb-3"></i>
+            <h4 class="font-semibold mb-1">Area Converter</h4>
+            <p class="text-sm text-muted">sq.ft, sq.yd, acres and more.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured properties with compare -->
+    <section class="py-12 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold">Featured Properties</h3>
+          <div class="flex items-center space-x-3">
+            <label class="text-sm text-muted">Sort</label>
+            <select id="sort-select" class="border rounded p-2 text-sm">
+              <option value="relevance">Relevance</option>
+              <option value="price-asc">Price — Low to High</option>
+              <option value="price-desc">Price — High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- card example -->
+          <article class="property-card rounded-xl overflow-hidden bg-white p-0 fade-in-section" data-id="prop-001">
+            <div class="h-44 bg-gradient-to-r from-blue-500 to-sky-700 relative">
+              <div class="absolute top-3 left-3 bg-amber-400 text-slate-900 px-2 py-1 rounded text-xs font-semibold">RERA Approved</div>
+              <div class="absolute top-3 right-3 bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">Ready to Move</div>
+            </div>
+            <div class="p-4">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="text-xl font-bold text-blue-600">₹2.8 Cr</div>
+                  <div class="text-sm text-muted">3 BHK Luxury Apartment • Kokapet</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-muted">Price/sq.ft</div>
+                  <div class="font-medium">₹12,444</div>
+                </div>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <div class="text-sm text-muted">My Home Avatar • 2,250 sq.ft</div>
+                <div class="flex gap-2 items-center">
+                  <button class="add-compare inline-flex items-center gap-2 px-3 py-1 border rounded text-sm hover:bg-slate-50" data-prop='{"id":"prop-001","title":"3 BHK Luxury Apt","price":"₹2.8 Cr","loc":"Kokapet"}' aria-pressed="false">
+                    <i class="fa-regular fa-check-square"></i> Compare
+                  </button>
+                  <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm">View</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- card 2 -->
+          <article class="property-card rounded-xl overflow-hidden bg-white p-0 fade-in-section" data-id="prop-002">
+            <div class="h-44 bg-gradient-to-r from-amber-500 to-yellow-700 relative">
+              <div class="absolute top-3 left-3 bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">Under Construction</div>
+            </div>
+            <div class="p-4">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="text-xl font-bold text-blue-600">₹5.2 Cr</div>
+                  <div class="text-sm text-muted">4 BHK Villa • Gachibowli</div>
+                </div>
+                <div class="text-right"><div class="text-xs text-muted">Price/sq.ft</div><div class="font-medium">₹11,555</div></div>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <div class="text-sm text-muted">Prestige Golfshire • 4,500 sq.ft</div>
+                <div class="flex gap-2 items-center">
+                  <button class="add-compare inline-flex items-center gap-2 px-3 py-1 border rounded text-sm" data-prop='{"id":"prop-002","title":"4 BHK Villa","price":"₹5.2 Cr","loc":"Gachibowli"}'>
+                    <i class="fa-regular fa-check-square"></i> Compare
+                  </button>
+                  <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm">View</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- card 3 -->
+          <article class="property-card rounded-xl overflow-hidden bg-white p-0 fade-in-section" data-id="prop-003">
+            <div class="h-44 bg-gradient-to-r from-green-500 to-teal-600 relative">
+              <div class="absolute top-3 left-3 bg-amber-400 text-slate-900 px-2 py-1 rounded text-xs font-semibold">RERA Approved</div>
+            </div>
+            <div class="p-4">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="text-xl font-bold text-blue-600">₹1.2 Cr</div>
+                  <div class="text-sm text-muted">Plot • Shadnagar</div>
+                </div>
+                <div class="text-right"><div class="text-xs text-muted">Price/sq.yd</div><div class="font-medium">₹24,000</div></div>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <div class="text-sm text-muted">BBG Ventures • 500 sq.yd</div>
+                <div class="flex gap-2 items-center">
+                  <button class="add-compare inline-flex items-center gap-2 px-3 py-1 border rounded text-sm" data-prop='{"id":"prop-003","title":"Corner Plot","price":"₹1.2 Cr","loc":"Shadnagar"}'>
+                    <i class="fa-regular fa-check-square"></i> Compare
+                  </button>
+                  <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm">View</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="text-center mt-8">
+          <button class="bg-blue-600 text-white px-6 py-2 rounded-lg">View All Properties</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Post Property CTA & Partner sign up -->
+    <section class="py-12 bg-gray-900 text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="rounded-2xl p-6 md:p-10 bg-gradient-to-r from-slate-800 to-slate-900 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <h3 class="text-2xl font-bold">Have a property to sell or are you a developer?</h3>
+            <p class="text-sm text-gray-200 mt-1">List on Zion Land and get verified leads. Developers: partner with us (RERA details required).</p>
+          </div>
+          <div class="flex gap-3">
+            <button id="post-prop" class="bg-white text-slate-900 px-4 py-2 rounded-lg font-semibold">Post Property (FREE)</button>
+            <button id="partner-btn" class="bg-transparent border border-white px-4 py-2 rounded-lg">Partner / Developer</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile App / downloads (placeholder) -->
+    <section class="py-12 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+        <h3 class="text-xl font-semibold mb-2">Mobile App Coming Soon</h3>
+        <p class="text-sm text-muted mb-4">Get alerts and manage listings from your phone.</p>
+        <div class="flex justify-center gap-4">
+          <a href="#" class="inline-block"><img alt="Google Play" src="https://placehold.co/150x45/ffffff/3b82f6?text=Google+Play" class="h-12 rounded-lg" /></a>
+          <a href="#" class="inline-block"><img alt="App Store" src="https://placehold.co/150x45/ffffff/3b82f6?text=App+Store" class="h-12 rounded-lg" /></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Compare Drawer -->
+  <aside id="compare-drawer" class="compare-drawer" aria-hidden="true">
+    <div class="p-4 flex items-center justify-between border-b">
+      <h4 class="font-bold">Compare Properties (<span id="compare-count">0</span>)</h4>
+      <div class="flex gap-2">
+        <button id="clear-compare" class="px-3 py-1 text-sm border rounded">Clear</button>
+        <button id="close-compare" class="px-3 py-1 bg-blue-600 text-white rounded">Close</button>
+      </div>
+    </div>
+    <div id="compare-list" class="p-4 overflow-auto" style="height:calc(100% - 64px)"></div>
+    <div class="p-4 border-t">
+      <button id="compare-action" class="w-full bg-blue-600 text-white py-2 rounded-lg">Compare Now</button>
+    </div>
+  </aside>
+
+  <!-- Partner Modal -->
+  <div id="partner-modal" class="fixed inset-0 bg-black/40 hidden z-60 items-center justify-center">
+    <div class="bg-white rounded-xl w-[min(720px,94%)] p-6">
+      <h3 class="text-lg font-bold mb-2">Developer / Partner Signup</h3>
+      <p class="text-sm text-muted mb-4">We verify RERA & documentation before listing. Please fill details to get started.</p>
+      <form id="partner-form" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input name="company" placeholder="Company / Developer Name" required class="border rounded p-2" />
+        <input name="contact" placeholder="Contact person & number" required class="border rounded p-2" />
+        <input name="email" placeholder="Email" type="email" required class="border rounded p-2" />
+        <input name="rera" placeholder="RERA registration no." class="border rounded p-2" />
+        <textarea name="notes" placeholder="Short note about your projects" class="border rounded p-2 md:col-span-2"></textarea>
+        <div class="md:col-span-2 flex justify-end gap-2">
+          <button type="button" id="partner-close" class="px-4 py-2 border rounded">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+        <div>
+          <h5 class="font-semibold mb-3">Zion Land</h5>
+          <ul class="space-y-2 text-gray-300">
+            <li><a href="#" class="hover:underline">About</a></li>
+            <li><a href="#" class="hover:underline">Mobile Apps</a></li>
+            <li><a href="#" class="hover:underline">Services</a></li>
+            <li><a href="#" class="hover:underline">Price Trends</a></li>
+            <li><a href="#" class="hover:underline">Post Property</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="font-semibold mb-3">Company</h5>
+          <ul class="space-y-2 text-gray-300">
+            <li><a href="#" class="hover:underline">Careers</a></li>
+            <li><a href="#" class="hover:underline">Contact</a></li>
+            <li><a href="#" class="hover:underline">Terms & Conditions</a></li>
+            <li><a href="#" class="hover:underline">Privacy Policy</a></li>
+            <li><a href="#" class="hover:underline">Feedback</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="font-semibold mb-3">Popular Locations</h5>
+          <ul class="space-y-2 text-gray-300">
+            <li><a href="#" class="hover:underline">Kokapet</a></li>
+            <li><a href="#" class="hover:underline">Gachibowli</a></li>
+            <li><a href="#" class="hover:underline">Shadnagar</a></li>
+            <li><a href="#" class="hover:underline">Miyapur</a></li>
+            <li><a href="#" class="hover:underline">HITEC City</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="font-semibold mb-3">Contact</h5>
+          <ul class="text-gray-300 space-y-3">
+            <li class="flex items-start gap-2"><i class="fa-solid fa-phone text-blue-400 mt-1"></i> +91 98765 43210</li>
+            <li class="flex items-start gap-2"><i class="fa-solid fa-envelope text-blue-400 mt-1"></i> <a href="mailto:info@zionland.example" class="hover:underline">info@zionland.example</a></li>
+            <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot text-blue-400 mt-1"></i> Hyderabad, Telangana</li>
+          </ul>
+
+          <div class="flex gap-3 mt-4">
+            <a href="#" aria-label="Facebook" class="text-xl hover:text-blue-300"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter" class="text-xl hover:text-blue-300"><i class="fa-brands fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn" class="text-xl hover:text-blue-300"><i class="fa-brands fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Instagram" class="text-xl hover:text-blue-300"><i class="fa-brands fa-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+        <p>© 2025 Zion Land. All rights reserved. RERA verification required for developer listings.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Minimal JS: three.js particles + UI utilities -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Basic Three.js particle background (kept lightweight)
+    (function initParticles(){
+      try {
+        const canvas = document.getElementById('particle-canvas');
+        if(!canvas) return;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+        const geometry = new THREE.BufferGeometry();
+        const count = 600;
+        const pos = new Float32Array(count * 3);
+        for(let i=0;i<count*3;i+=3){
+          pos[i] = (Math.random()-0.5)*14;
+          pos[i+1] = (Math.random()-0.5)*8;
+          pos[i+2] = (Math.random()-0.5)*6;
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(pos,3));
+        const material = new THREE.PointsMaterial({size:0.04, color:0x6fb0ff, transparent:true, opacity:0.6});
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
+        camera.position.z = 8;
+        function animate(){
+          requestAnimationFrame(animate);
+          points.rotation.y += 0.0008;
+          renderer.render(scene,camera);
+        }
+        animate();
+        window.addEventListener('resize',()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+      } catch(e) { console.warn('Particles disabled',e); }
+    })();
+
+
+    // Scroll reveal
+    const fadeIns = document.querySelectorAll('.fade-in-section');
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting) e.target.classList.add('is-visible');
+      });
+    }, {threshold: 0.12});
+    fadeIns.forEach(n=>io.observe(n));
+
+    // Mobile nav toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+    navToggle && navToggle.addEventListener('click', () => {
+      const open = mobileNav.classList.toggle('hidden');
+      navToggle.setAttribute('aria-expanded', String(!open));
+    });
+
+    // Search suggestions (client-side stub)
+    (function(){
+      const searchInput = document.getElementById('search-input');
+      const suggestions = document.getElementById('search-suggestions');
+      const sampleLocations = ["Kokapet","Gachibowli","Shadnagar","Miyapur","HITEC City","Nanakramguda","Kondapur","Madhapur"];
+      const sampleDev = ["My Home Group","Prestige Group","BBG Land","Aparna","Raheja"];
+      const sampleTypes = ["3 BHK Flats","4 BHK Villas","Plots","Commercial"];
+      function show(){
+        const q = (searchInput.value || '').toLowerCase().trim();
+        if(q.length < 2){ suggestions.style.display='none'; return; }
+        const items = [];
+        sampleLocations.forEach(x=> { if(x.toLowerCase().includes(q)) items.push({t:x, type:'location'}) });
+        sampleDev.forEach(x=> { if(x.toLowerCase().includes(q)) items.push({t:x, type:'developer'})});
+        sampleTypes.forEach(x=> { if(x.toLowerCase().includes(q)) items.push({t:x, type:'type'})});
+        suggestions.innerHTML = items.slice(0,8).map(it=>`<div role="option" tabindex="0" class="p-3 border-b last:border-b-0 cursor-pointer"><strong>${it.t}</strong> <span class="text-xs text-muted"> ${it.type}</span></div>`).join('');
+        if(items.length) { suggestions.style.display='block'; } else { suggestions.style.display='none'; }
+        // click delegation
+        suggestions.querySelectorAll('div[role="option"]').forEach(el=>{
+          el.addEventListener('click', ()=> { searchInput.value = el.textContent.trim(); suggestions.style.display='none'; });
+        });
+      }
+      searchInput && searchInput.addEventListener('input', show);
+      document.addEventListener('click', (e)=> { if(!searchInput.contains(e.target) && !suggestions.contains(e.target)) suggestions.style.display='none'; });
+    })();
+
+    // Compare feature
+    (function(){
+      const addBtns = document.querySelectorAll('.add-compare');
+      const drawer = document.getElementById('compare-drawer');
+      const compareList = document.getElementById('compare-list');
+      const compareCount = document.getElementById('compare-count');
+      const closeCompare = document.getElementById('close-compare');
+      const clearBtn = document.getElementById('clear-compare');
+      const compareAction = document.getElementById('compare-action');
+      let compare = [];
+
+      function renderDrawer() {
+        compareCount.textContent = compare.length;
+        compareList.innerHTML = compare.length ? compare.map(p => `
+          <div class="border-b py-3 flex justify-between items-center">
+            <div>
+              <div class="font-semibold">${p.title}</div>
+              <div class="text-xs text-muted">${p.loc} • ${p.price}</div>
+            </div>
+            <button class="px-2 py-1 text-sm border rounded remove-compare" data-id="${p.id}">Remove</button>
+          </div>
+        `).join('') : '<div class="text-sm text-muted">No properties selected.</div>';
+        drawer.classList.toggle('open', compare.length>0);
+        drawer.setAttribute('aria-hidden', String(!(compare.length>0)));
+        document.querySelectorAll('.remove-compare').forEach(btn => btn.addEventListener('click', (e)=> {
+          const id = btn.getAttribute('data-id');
+          compare = compare.filter(x=>x.id!==id);
+          renderDrawer();
+        }));
+      }
+
+      addBtns.forEach(btn => {
+        btn.addEventListener('click', ()=>{
+          try {
+            const obj = JSON.parse(btn.getAttribute('data-prop'));
+            if(!compare.find(x=>x.id===obj.id)) {
+              if(compare.length >= 4) { alert('You can compare up to 4 properties.'); return; }
+              compare.push(obj);
+              renderDrawer();
+            } else {
+              // toggle remove if already added
+              compare = compare.filter(x=>x.id!==obj.id);
+              renderDrawer();
+            }
+          } catch(e){ console.error(e); }
+        });
+      });
+
+      closeCompare && closeCompare.addEventListener('click', ()=> { compare = []; renderDrawer(); });
+      clearBtn && clearBtn.addEventListener('click', ()=> { compare = []; renderDrawer(); });
+      compareAction && compareAction.addEventListener('click', ()=> {
+        if(compare.length < 2) { alert('Select at least two properties to compare.'); return; }
+        // placeholder: open a dedicated compare view or send to server
+        alert('Launching compare view for ' + compare.map(x=>x.title).join(', '));
+      });
+    })();
+
+    // Partner modal controls
+    (function(){
+      const partnerBtn = document.getElementById('partner-btn');
+      const partnerModal = document.getElementById('partner-modal');
+      const partnerClose = document.getElementById('partner-close');
+      const partnerForm = document.getElementById('partner-form');
+
+      partnerBtn && partnerBtn.addEventListener('click', ()=> { partnerModal.classList.remove('hidden'); partnerModal.classList.add('flex'); });
+      partnerClose && partnerClose.addEventListener('click', ()=> { partnerModal.classList.add('hidden'); partnerModal.classList.remove('flex'); });
+      partnerForm && partnerForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        alert('Thank you! Partner request received — we will contact you for verification.');
+        partnerModal.classList.add('hidden'); partnerModal.classList.remove('flex');
+      });
+    })();
+
+    // Post Property sample
+    document.getElementById('post-prop')?.addEventListener('click', ()=> alert('Post property flow — login required (to be implemented).'));
+
+    // Accessibility: close partner modal on ESC
+    document.addEventListener('keydown', (e)=> {
+      if(e.key === 'Escape') {
+        document.getElementById('partner-modal')?.classList.add('hidden');
+      }
+    });
+
+  </script>
+</body>
+</html>
